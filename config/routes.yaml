@@ -1,0 +1,9 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+#
+
+find_claim_by_category:
+  path: /api/findClaimByCategory{claimCategory}
+  controller: App\Controller\ClaimController::findClaimByCategory
+  methods: POST

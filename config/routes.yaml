@@ -2,6 +2,9 @@
 #    path: /
 #    controller: App\Controller\DefaultController::index
 #
+api_login_check:
+  path: /api/login
+  methods: ['POST']
 
 find_claim_by_category:
   path: /api/findClaimByCategory{claimCategory}

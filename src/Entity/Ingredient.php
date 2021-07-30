@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource()
@@ -21,21 +22,24 @@ class Ingredient
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"fromRecipe"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"fromRecipe"})
      */
     private $name;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"fromRecipe"})
      */
     private $isActive;
 
     /**
-     * @ORM\OneToMany(targetEntity=RecipeIngredient::class, mappedBy="ingredient")
+     * @ORM\OneToMany(targetEntity=RecipeIngredient::class, mappedBy="ingredient",cascade={"persist", "remove"})
      */
     private $recipeIngredients;
 

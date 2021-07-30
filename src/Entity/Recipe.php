@@ -3,15 +3,35 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiProperty;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use App\Repository\RecipeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *      collectionOperations={
+ *          "get"={"normalization_context"={"groups"="fromRecipe"}},
+ *          "post"={"denormalization_context"={"groups"="fromRecipe"}},
+ *          
+ * },
+ *      itemOperations={
+ *          "get"={"normalization_context"={"groups"="fromRecipe"}},
+ *          "put"
+ * },
+ * 
+ * )
  * @ORM\Entity(repositoryClass=RecipeRepository::class)
+ * @ApiFilter(SearchFilter::class)
  */
 class Recipe
 {
@@ -21,63 +41,94 @@ class Recipe
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"fromRecipe"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"fromRecipe"})
      */
     private $title;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"fromRecipe"})
      */
     private $description;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $image;
+    
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"fromRecipe"})
      */
     private $steps;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
+     * @Groups({"fromRecipe"})
      */
     private $calories;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
+     * @Groups({"fromRecipe"})
      */
     private $preparationTime;
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
+     * @Groups({"fromRecipe"})
      */
     private $isActive;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\Choice(callback={"App\Enum\Category", "getPossibleValues"})
+     * @Groups({"fromRecipe"})
      */
     private $category;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true, columnDefinition="enum('Entreecource', 'Maindish', 'SideDish', 'Dessert', 'Drink', 'Other')")
+     * @Groups({"fromRecipe"})
      */
     private $difficulty;
 
     /**
      * @ORM\OneToMany(targetEntity=RecipeIngredient::class, mappedBy="recipe")
+     * @Groups({"fromRecipe"})
+     * @ApiSubresource()
      */
     private $recipeIngredients;
 
     /**
-     * @ORM\OneToMany(targetEntity=Review::class, mappedBy="recipe")
+     * @ORM\OneToMany(targetEntity=Review::class, mappedBy="recipe",cascade={"persist", "remove"})
+     * @Groups({"fromRecipe"})
      */
     private $reviews;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="recipes")
+     * @ORM\JoinColumn(nullable=false)
+     * @Groups({"fromRecipe"})
+     */
+    private $user;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     * @Groups({"fromRecipe"})
+     */
+    private $servesNumPersons;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=MediaObject::class)
+     * @ORM\JoinColumn(nullable=true)
+     * @Groups({"fromRecipe"})
+     * @ApiProperty(iri= "http://schema.org/image")
+     */
+    private $image;
 
     public function __construct()
     {
@@ -114,12 +165,12 @@ class Recipe
         return $this;
     }
 
-    public function getImage(): ?string
+    public function getImage(): ?MediaObject
     {
         return $this->image;
     }
 
-    public function setImage(?string $image): self
+    public function setImage(?MediaObject $image): self
     {
         $this->image = $image;
 
@@ -254,6 +305,30 @@ class Recipe
                 $review->setRecipe(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getServesNumPersons(): ?int
+    {
+        return $this->servesNumPersons;
+    }
+
+    public function setServesNumPersons(?int $servesNumPersons): self
+    {
+        $this->servesNumPersons = $servesNumPersons;
 
         return $this;
     }

@@ -7,6 +7,7 @@ use App\Repository\ReviewRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Gedmo\Blameable\Traits\BlameableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource()
@@ -30,11 +31,13 @@ class Review
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
+     * @Groups({"fromRecipe"})
      */
     private $isLiked;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"fromRecipe"})
      */
     private $description;
 
